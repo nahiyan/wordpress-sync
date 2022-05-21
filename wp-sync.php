@@ -16,18 +16,21 @@ class WPSync
 {
     public static function activate()
     {
-        Logger::debug("Activation");
+        Logger::debug(null, "Activation");
+
+        $pages = Page::getFromDir(BASE_DIR . "tmp/pages");
+        Logger::debugJson("Pages", $pages);
     }
 }
 
 register_activation_hook(__FILE__, function () {
     WPSync::activate();
 });
-$pages = Page::getFromDir(BASE_DIR . "tmp/pages");
+// $pages = Page::getFromDir(BASE_DIR . "tmp/pages");
 // $pages = Page::upsert($pages);
 
-Logger::debug("---------------------------------------");
-Logger::debug(json_encode($pages, JSON_PRETTY_PRINT));
+// Logger::debug(null, "---------------------------------------");
+// Logger::debug(json_encode($pages, JSON_PRETTY_PRINT));
 // foreach ($pages as $page) {
 //     Logger::debug($page->id);
 //     Logger::debug($page->name);
@@ -38,3 +41,5 @@ Logger::debug(json_encode($pages, JSON_PRETTY_PRINT));
 // }
 
 // Logger::debug(json_encode(Page::getFromPath("bootcamp")));
+
+Logger::debugJson("page", Page::getFromPath("bootcamp/javascript/section1/pageone"));

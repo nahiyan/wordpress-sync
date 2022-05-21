@@ -1,5 +1,7 @@
 <?php
 
+require_once "config.php";
+
 class Page
 {
     public $id = 0;
@@ -9,28 +11,31 @@ class Page
     public $parentId = 0;
     public $parentPath;
 
-    public static function getFromDir($dir, $parent_id = 0)
+    public static function getFromDir($dir, $parent_id = 0, $exclusion = "")
     {
         $dir_listing = scandir($dir);
         $pages = [];
 
         foreach ($dir_listing as $item) {
-            if ($item == "." || $item == "..") {
+            $path = $dir . DIRECTORY_SEPARATOR . $item;
+
+            if ($item == "." || $item == ".." || $path == $exclusion) {
                 continue;
             }
 
-            $path = $dir . DIRECTORY_SEPARATOR . $item;
+            Logger::debug("Path", $path);
+
             $is_dir = is_dir($path);
             $ext = pathinfo($path, PATHINFO_EXTENSION);
 
-            // Process the page name
+            // * Process the page name
             if (strlen($ext) > 0) {
                 $name = substr($item, 0, strlen($item) - strlen($ext) - 1);
             } else {
                 $name = $item;
             }
 
-            // Prepare the page
+            // * Prepare the page
             $page = new Page();
             $page->name = $name;
             $page->title = $item;
@@ -38,38 +43,50 @@ class Page
             $page->parentPath = Page::wpPathFromDir($dir);
             $page->parentId = $parent_id;
 
-            // Fetch the page ID if it exists
-            $page_ = Page::getFromPath($page->parentPath . DIRECTORY_SEPARATOR . $page->name);
+            // * Fetch the page ID if it exists
+            Logger::debug("Parent Path", $page->parentPath);
+            $page_ = Page::getFromPath(path_join($page->parentPath, $page->name));
             if ($page_ != null) {
                 $page->id = $page_->id;
             }
 
-            Logger::debug($name);
-            Logger::debug($page->parentPath);
+            // Logger::debug($name);
+            // Logger::debug($page->parentPath);
 
+            // * Prepare the page details
             if ($is_dir) {
-                // If the item doesn't have an associated HTML file, create a blank page
-                if (!is_file($path . DIRECTORY_SEPARATOR . $item . ".html")) {
-                    array_push($pages, $page);
-                }
-
-                // Handle the children
-                $children = Page::getFromDir($path, $page->id);
-                foreach ($children as $child) {
-                    array_push($pages, $child);
+                // If the item has an associated HTML file, create a blank page
+                $pageDefinitionFilePath = path_join($path, $item . ".html");
+                // Logger::debug("Page definition path", $pageDefinitionFilePath);
+                if (is_file($pageDefinitionFilePath)) {
+                    $page->content = file_get_contents($pageDefinitionFilePath);
                 }
             } else if ($ext == "html") {
                 $page->content = file_get_contents($path);
-                array_push($pages, $page);
             }
+
+            // * Upsert the page
+            $page->id = $page->upsertWPPost();
+
+            // Logger::debugJson("Page", $page);
+
+            // * Handle the children
+            if ($is_dir) {
+                $children = Page::getFromDir($path, $page->id, $pageDefinitionFilePath);
+                foreach ($children as $child) {
+                    array_push($pages, $child);
+                }
+            }
+
+            array_push($pages, $page);
         }
         return $pages;
     }
 
     public static function getFromPath($path)
     {
+        Logger::debug("Get from Path", $path);
         $result = get_page_by_path($path);
-
         if ($result == null) {
             return null;
         }
@@ -91,16 +108,27 @@ class Page
 
     public function upsertWPPost()
     {
-        $post = wp_insert_post([
-            "ID" => $this->id,
+        $post_definition = [
             'post_title' => wp_strip_all_tags($this->title),
+            'post_name' => $this->name,
             'post_content' => $this->content,
             'post_status' => 'publish',
             'post_author' => Config::$userId,
             'post_type' => "page",
-        ]);
+            'post_parent' => $this->parentId,
+        ];
+        if ($this->id != 0) {
+            $post_definition['ID'] = $this->id;
+        }
+        Logger::debugJson("Upsert", $post_definition);
 
-        return $post;
+        $post_id = wp_insert_post($post_definition);
+
+        if (is_integer($post_id)) {
+            return $post_id;
+        }
+
+        return 0;
     }
 
     public static function wpPathFromDir($wpPath)
