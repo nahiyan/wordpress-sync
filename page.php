@@ -11,10 +11,14 @@ class Page
     public $parentId = 0;
     public $parentPath;
 
-    public static function upsertFromDir($dir, $parent_id = 0, $exclusion = "")
+    public static function upsertFromDir($dir, $parent_id = 0, $exclusion = "", $base_dir = "")
     {
         $dir_listing = scandir($dir);
         $pages = [];
+
+        if ($base_dir == "") {
+            $base_dir = $dir;
+        }
 
         foreach ($dir_listing as $item) {
             $path = $dir . DIRECTORY_SEPARATOR . $item;
@@ -40,7 +44,7 @@ class Page
             $page->name = $name;
             $page->title = $item;
             $page->content = "Blank page";
-            $page->parentPath = Page::wpPathFromDir($dir);
+            $page->parentPath = Page::wpPathFromDir($dir, $base_dir);
             $page->parentId = $parent_id;
 
             // * Fetch the page ID if it exists
@@ -72,7 +76,7 @@ class Page
 
             // * Handle the children
             if ($is_dir) {
-                $children = Page::upsertFromDir($path, $page->id, $pageDefinitionFilePath);
+                $children = Page::upsertFromDir($path, $page->id, $pageDefinitionFilePath, $base_dir);
                 foreach ($children as $child) {
                     array_push($pages, $child);
                 }
@@ -131,13 +135,12 @@ class Page
         return 0;
     }
 
-    public static function wpPathFromDir($wpPath)
+    public static function wpPathFromDir($wpPath, $base_dir)
     {
-        $redundancy = BASE_DIR . "tmp" . DIRECTORY_SEPARATOR . "pages";
-        if (str_starts_with($wpPath, $redundancy) . DIRECTORY_SEPARATOR) {
-            $resultingPath = substr($wpPath, strlen($redundancy . DIRECTORY_SEPARATOR));
-        } else if (str_starts_with($wpPath, $redundancy)) {
-            $resultingPath = substr($wpPath, strlen($redundancy));
+        if (str_starts_with($wpPath, $base_dir) . DIRECTORY_SEPARATOR) {
+            $resultingPath = substr($wpPath, strlen($base_dir . DIRECTORY_SEPARATOR));
+        } else if (str_starts_with($wpPath, $base_dir)) {
+            $resultingPath = substr($wpPath, strlen($base_dir));
         } else {
             return $wpPath;
         }
