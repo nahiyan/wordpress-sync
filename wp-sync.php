@@ -12,7 +12,7 @@ if (!function_exists("register_activation_hook")) {
     exit();
 }
 
-class WPSync
+class WpSync
 {
     public static function Start()
     {
