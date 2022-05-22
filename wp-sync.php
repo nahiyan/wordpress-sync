@@ -27,12 +27,12 @@ class WPSync
 
         // Endpoint
         add_action('rest_api_init', function () {
-            register_rest_route('wp-sync/v1', 'sync', array(
+            register_rest_route('wp-sync/v1', 'sync', [
                 'methods' => 'POST',
                 'callback' => 'WPSync::sync',
-            ));
+                'permission_callback' => '__return_true',
+            ]);
         });
-
     }
 
     public static function sync()
