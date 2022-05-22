@@ -4,13 +4,13 @@ class Logger
 {
     public static function debug($key, $message)
     {
-        $log_file = BASE_DIR . '/logs/debug.log';
-        error_log(($key != null ? $key . ": " : "") . $message . PHP_EOL, 3, $log_file);
+        $logFilePath = path_join(BASE_DIR, 'logs' . DIRECTORY_SEPARATOR . 'debug.log');
+        error_log(($key != null ? $key . ": " : "") . $message . PHP_EOL, 3, $logFilePath);
     }
     public static function debugJson($key, $json)
     {
-        $log_file = BASE_DIR . '/logs/debug.log';
+        $logFilePath = path_join(BASE_DIR, 'logs' . DIRECTORY_SEPARATOR . 'debug.log');
         $message = json_encode($json, JSON_PRETTY_PRINT);
-        error_log(($key != null ? $key . ": " : "") . $message . PHP_EOL, 3, $log_file);
+        error_log(($key != null ? $key . ": " : "") . $message . PHP_EOL, 3, $logFilePath);
     }
 }
