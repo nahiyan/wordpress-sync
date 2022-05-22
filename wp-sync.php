@@ -53,4 +53,4 @@ class WPSync
     }
 }
 
-WPSync::Start();
+add_action('init', '\Vivasoft\WpSync\WPSync::Start');
