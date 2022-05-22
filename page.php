@@ -11,7 +11,7 @@ class Page
     public $parentId = 0;
     public $parentPath;
 
-    public static function getFromDir($dir, $parent_id = 0, $exclusion = "")
+    public static function upsertFromDir($dir, $parent_id = 0, $exclusion = "")
     {
         $dir_listing = scandir($dir);
         $pages = [];
@@ -72,7 +72,7 @@ class Page
 
             // * Handle the children
             if ($is_dir) {
-                $children = Page::getFromDir($path, $page->id, $pageDefinitionFilePath);
+                $children = Page::upsertFromDir($path, $page->id, $pageDefinitionFilePath);
                 foreach ($children as $child) {
                     array_push($pages, $child);
                 }
@@ -147,33 +147,5 @@ class Page
         }
 
         return $resultingPath;
-    }
-
-    public static function upsert($pages)
-    {
-        $pagesMap = [];
-
-        foreach ($pages as $page) {
-            if (str_ends_with($page->parentPath, $page->name)) {
-                // If parent and current page's name are the same
-                $full_path = $page->parentPath;
-            } else {
-                $full_path = $page->parentPath . DIRECTORY_SEPARATOR . $page->name;
-            }
-
-            $pagesMap[$full_path] = $page;
-
-            if (array_key_exists($page->parentPath, $pagesMap)) {
-                $page->parentId = $pagesMap[$page->parentPath]->id;
-            }
-
-            // Get ID if the page exists
-            $page_ = Page::getFromPath($full_path);
-            if ($page_ != null) {
-                $page->id = $page_->id;
-            }
-        }
-
-        return $pages;
     }
 }
