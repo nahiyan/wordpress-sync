@@ -7,6 +7,7 @@
 require_once 'consts.php';
 require_once 'logger.php';
 require_once 'page.php';
+require_once 'settings_menu.php';
 
 if (!function_exists("register_activation_hook")) {
     exit();
@@ -14,32 +15,42 @@ if (!function_exists("register_activation_hook")) {
 
 class WPSync
 {
+    public static function Start()
+    {
+        // Activation hook
+        register_activation_hook(__FILE__, 'WPSync::activate');
+
+        // Settings
+        $settings_menu = new WPSyncSettingsMenu();
+        add_action('admin_menu', array($settings_menu, 'wp_sync_add_plugin_page'));
+        add_action('admin_init', array($settings_menu, 'wp_sync_page_init'));
+
+        // Endpoint
+        add_action('rest_api_init', function () {
+            register_rest_route('wp-sync/v1', 'sync', array(
+                'methods' => 'POST',
+                'callback' => 'WPSync::sync',
+            ));
+        });
+
+    }
+
+    public static function sync()
+    {
+        Logger::debug(null, "Endpoint Called!");
+        $pages = Page::upsertFromDir(BASE_DIR . "tmp/pages");
+        Logger::debugJson("Pages", $pages);
+        // $inputJSON = file_get_contents('php://input');
+        // Logger::debug("Input", $inputJSON);
+    }
+
     public static function activate()
     {
         Logger::debug(null, "Activation");
 
-        $pages = Page::getFromDir(BASE_DIR . "tmp/pages");
-        Logger::debugJson("Pages", $pages);
+        // $pages = Page::upsertFromDir(BASE_DIR . "tmp/pages");
+        // Logger::debugJson("Pages", $pages);
     }
 }
 
-register_activation_hook(__FILE__, function () {
-    WPSync::activate();
-});
-// $pages = Page::getFromDir(BASE_DIR . "tmp/pages");
-// $pages = Page::upsert($pages);
-
-// Logger::debug(null, "---------------------------------------");
-// Logger::debug(json_encode($pages, JSON_PRETTY_PRINT));
-// foreach ($pages as $page) {
-//     Logger::debug($page->id);
-//     Logger::debug($page->name);
-//     Logger::debug($page->parentPath);
-//     Logger::debug($page->parentId);
-//     Logger::debug("==");
-//     // Logger::debug(json_encode($page, JSON_PRETTY_PRINT));
-// }
-
-// Logger::debug(json_encode(Page::getFromPath("bootcamp")));
-
-Logger::debugJson("page", Page::getFromPath("bootcamp/javascript/section1/pageone"));
+WPSync::Start();
