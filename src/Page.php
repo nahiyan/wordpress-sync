@@ -59,14 +59,19 @@ class Page
 
             // * Prepare the page details
             if ($is_dir) {
-                // If the item has an associated HTML file, create a blank page
-                $pageDefinitionFilePath = path_join($path, $item . ".html");
-                // Logger::debug("Page definition path", $pageDefinitionFilePath);
-                if (is_file($pageDefinitionFilePath)) {
-                    $page->content = file_get_contents($pageDefinitionFilePath);
+                // If the dir has an associated HTML file, create a blank page
+                foreach (Config::$formats as $format) {
+                    $pageDefinitionFilePath = path_join($path, $item . ".$format");
+
+                    // Logger::debug("Page definition path", $pageDefinitionFilePath);
+                    if (is_file($pageDefinitionFilePath)) {
+                        $page->loadFromFile($pageDefinitionFilePath, $format);
+                        break;
+                    }
                 }
-            } else if ($ext == "html") {
-                $page->content = file_get_contents($path);
+
+            } else if (in_array($ext, Config::$formats)) {
+                $page->loadFromFile($path, $ext);
             } else {
                 continue;
             }
@@ -89,7 +94,7 @@ class Page
         return $pages;
     }
 
-    public static function getFromPath($path)
+    private static function getFromPath($path)
     {
         Logger::debug("Get from Path", $path);
         $result = get_page_by_path($path);
@@ -100,7 +105,7 @@ class Page
         return Page::getFromWPPost($result);
     }
 
-    public static function getFromWPPost($wpPost)
+    private static function getFromWPPost($wpPost)
     {
         $page = new Page();
         $page->id = $wpPost->ID;
@@ -112,7 +117,7 @@ class Page
         return $page;
     }
 
-    public function upsertWPPost()
+    private function upsertWPPost()
     {
         $post_definition = [
             'post_title' => wp_strip_all_tags($this->title),
@@ -137,7 +142,7 @@ class Page
         return 0;
     }
 
-    public static function wpPathFromDir($wpPath, $base_dir)
+    private static function wpPathFromDir($wpPath, $base_dir)
     {
         if (str_starts_with($wpPath, $base_dir) . DIRECTORY_SEPARATOR) {
             $resultingPath = substr($wpPath, strlen($base_dir . DIRECTORY_SEPARATOR));
@@ -152,5 +157,33 @@ class Page
         }
 
         return $resultingPath;
+    }
+
+    private function loadFromFile($filepath, $format)
+    {
+        // * Grab the content
+        $content = file_get_contents($filepath);
+        switch ($format) {
+            case "html":
+                $this->content = $content;
+                break;
+            case "md":
+                $parsedown = new \Parsedown();
+                $this->content = $parsedown->text($content);
+                break;
+        }
+
+        // * Grab the title
+        $starting_str = "<!-- Title:";
+        $start = strpos($content, $starting_str);
+        $end = strpos($content, "-->");
+
+        if ($start === false || $end === false) {
+            return;
+        }
+
+        $starting_str_len = strlen($starting_str);
+        $title = trim(substr($content, $start + $starting_str_len, $end - $starting_str_len));
+        $this->title = $title;
     }
 }
