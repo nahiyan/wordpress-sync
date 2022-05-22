@@ -8,6 +8,7 @@ require_once 'consts.php';
 require_once 'logger.php';
 require_once 'page.php';
 require_once 'settings_menu.php';
+require_once 'github.php';
 
 if (!function_exists("register_activation_hook")) {
     exit();
@@ -38,8 +39,14 @@ class WPSync
     public static function sync()
     {
         Logger::debug(null, "Endpoint Called!");
-        $pages = Page::upsertFromDir(BASE_DIR . "tmp/pages");
-        Logger::debugJson("Pages", $pages);
+
+        $sync_result = GitHub::sync();
+        if (!$sync_result) {
+            return false;
+        }
+
+        // $pages = Page::upsertFromDir(BASE_DIR . "tmp/pages");
+        // Logger::debugJson("Pages", $pages);
         // $inputJSON = file_get_contents('php://input');
         // Logger::debug("Input", $inputJSON);
     }
