@@ -6,6 +6,7 @@ class Config
 {
     public static $userId = 1;
     public static $optionsName = "wp_sync_options";
+    public static $formats = ["html", "md"];
 
     public static function getGitHubRepoUrl()
     {
