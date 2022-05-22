@@ -94,7 +94,7 @@ class Page
         return $pages;
     }
 
-    private static function getFromPath($path)
+    public static function getFromPath($path)
     {
         Logger::debug("Get from Path", $path);
         $result = get_page_by_path($path);
