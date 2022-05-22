@@ -50,9 +50,6 @@ class WPSync
     public static function activate()
     {
         Logger::debug(null, "Activation");
-
-        // $pages = Page::upsertFromDir(BASE_DIR . "tmp/pages");
-        // Logger::debugJson("Pages", $pages);
     }
 }
 
