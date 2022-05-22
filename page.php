@@ -67,6 +67,8 @@ class Page
                 }
             } else if ($ext == "html") {
                 $page->content = file_get_contents($path);
+            } else {
+                continue;
             }
 
             // * Upsert the page
