@@ -22,7 +22,10 @@ class Menu
 
             $ext = pathinfo($path, PATHINFO_EXTENSION);
             if ($ext == "xml") {
-                $menu = Menu::createFromFile($path);
+                $result = wp_get_nav_menu_object("javascript-bootcamp");
+                wp_delete_nav_menu($result);
+
+                $menu = Menu::loadFromFile($path);
                 Logger::debugJson("menu", $menu);
             }
         }
@@ -30,7 +33,7 @@ class Menu
         return $menus;
     }
 
-    private static function createFromFile($filename)
+    private static function loadFromFile($filename)
     {
         $items = [];
         $content = file_get_contents($filename);

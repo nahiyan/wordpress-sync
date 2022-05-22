@@ -8,9 +8,9 @@ class MenuItem
     public $title;
     public $link;
     public $page_id;
-    public $page;
+    public $page = "";
 
-    public static function getItems($menu)
+    public static function getItems($menu, $path = "")
     {
         $items = [];
 
@@ -29,7 +29,15 @@ class MenuItem
                 case "link":
                     $item->link = $value;
                 case "page":
-                    $item->page = $value;
+                    $item->page = $path . "/" . $value;
+                    if (str_starts_with($item->page, "/")) {
+                        $item->page = substr($item->page, 1);
+                    }
+
+                    $page = Page::getFromPath($item->page);
+                    if ($page) {
+                        $item->page_id = $page->id;
+                    }
                     break;
             }
 
@@ -38,7 +46,7 @@ class MenuItem
 
         $children = $menu->children();
         foreach ($children as $child) {
-            $items_ = MenuItem::getItems($child);
+            $items_ = MenuItem::getItems($child, $item->page);
             foreach ($items_ as $item) {
                 $items[] = $item;
             }
