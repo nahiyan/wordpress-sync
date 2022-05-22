@@ -1,6 +1,6 @@
 # WP Sync
 
-A WordPress plugin to sync posts and menus between GitHub and Wordpress.
+A WordPress plugin to sync pages and menus between GitHub and Wordpress.
 
 # Motive
 
