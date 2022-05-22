@@ -1,14 +1,12 @@
 <?php
 
+namespace Vivasoft\WpSync;
+
 /**
  * Plugin Name: WP Sync
  */
 
-require_once 'consts.php';
-require_once 'logger.php';
-require_once 'page.php';
-require_once 'settings_menu.php';
-require_once 'github.php';
+require_once 'vendor/autoload.php';
 
 if (!function_exists("register_activation_hook")) {
     exit();
@@ -22,7 +20,7 @@ class WPSync
         register_activation_hook(__FILE__, 'WPSync::activate');
 
         // Settings
-        $settings_menu = new WPSyncSettingsMenu();
+        $settings_menu = new SettingsMenu();
         add_action('admin_menu', array($settings_menu, 'wp_sync_add_plugin_page'));
         add_action('admin_init', array($settings_menu, 'wp_sync_page_init'));
 
@@ -30,7 +28,7 @@ class WPSync
         add_action('rest_api_init', function () {
             register_rest_route('wp-sync/v1', 'sync', [
                 'methods' => 'POST',
-                'callback' => 'WPSync::sync',
+                'callback' => '\Vivasoft\WPSync\WPSync::sync',
                 'permission_callback' => '__return_true',
             ]);
         });
@@ -45,8 +43,6 @@ class WPSync
             return false;
         }
 
-        // $pages = Page::upsertFromDir(BASE_DIR . "tmp/pages");
-        // Logger::debugJson("Pages", $pages);
         // $inputJSON = file_get_contents('php://input');
         // Logger::debug("Input", $inputJSON);
     }

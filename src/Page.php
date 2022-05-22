@@ -1,6 +1,6 @@
 <?php
 
-require_once "config.php";
+namespace Vivasoft\WpSync;
 
 class Page
 {

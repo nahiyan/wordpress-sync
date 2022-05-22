@@ -1,0 +1,15 @@
+{
+    "name": "vivasoft/wp-sync",
+    "autoload": {
+        "psr-4": {
+            "Vivasoft\\WpSync\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Nahiyan Alamgir",
+            "email": "nahiyan.alamgir0@gmail.com"
+        }
+    ],
+    "require": {}
+}

@@ -1,8 +1,11 @@
 <?php
 
+namespace Vivasoft\WpSync;
+
 class Config
 {
     public static $userId = 1;
+    public static $optionsName = "wp_sync_options";
 
     public static function getGitHubRepoUrl()
     {
@@ -25,6 +28,11 @@ class Config
 
     private static function options()
     {
-        return get_option(WP_SYNC_OPTIONS_NAME);
+        return get_option(Config::$optionsName);
+    }
+
+    public static function getBaseDir()
+    {
+        return path_join(plugin_dir_path(__FILE__), "../");
     }
 }

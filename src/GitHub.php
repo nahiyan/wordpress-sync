@@ -1,6 +1,6 @@
 <?php
 
-require_once "config.php";
+namespace Vivasoft\WpSync;
 
 class GitHub
 {
@@ -12,28 +12,28 @@ class GitHub
         $repo_name = explode("/", $repo_url_simplified)[2];
 
         // // * Clean the /tmp folder
-        system("rm -rf " . path_join(BASE_DIR, "tmp"));
-        mkdir(path_join(BASE_DIR, "tmp"));
+        system("rm -rf " . path_join(Config::getBaseDir(), "tmp"));
+        mkdir(path_join(Config::getBaseDir(), "tmp"));
 
         // * Download the repository
         $repo_compressed_url = $repo_url . "/archive/refs/heads/" . $repo_branch . ".zip";
-        $copy_result = copy($repo_compressed_url, path_join(BASE_DIR, "tmp/compressed.zip"));
+        $copy_result = copy($repo_compressed_url, path_join(Config::getBaseDir(), "tmp/compressed.zip"));
         if (!$copy_result) {
             return false;
         }
 
         // * Decompress the repository
-        $zip = new ZipArchive;
-        $res = $zip->open(path_join(BASE_DIR, "tmp/compressed.zip"));
+        $zip = new \ZipArchive;
+        $res = $zip->open(path_join(Config::getBaseDir(), "tmp/compressed.zip"));
         if ($res) {
-            $zip->extractTo(path_join(BASE_DIR, "tmp"));
+            $zip->extractTo(path_join(Config::getBaseDir(), "tmp"));
             $zip->close();
         } else {
             return false;
         }
 
         // * Upsert pages from the content
-        $pages = Page::upsertFromDir(BASE_DIR . "tmp" . DIRECTORY_SEPARATOR . $repo_name . "-" . $repo_branch . DIRECTORY_SEPARATOR . "pages");
+        $pages = Page::upsertFromDir(Config::getBaseDir() . "tmp" . DIRECTORY_SEPARATOR . $repo_name . "-" . $repo_branch . DIRECTORY_SEPARATOR . "pages");
         Logger::debugJson("Pages", $pages);
 
         return true;

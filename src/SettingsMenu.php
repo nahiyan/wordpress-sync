@@ -1,6 +1,8 @@
 <?php
 
-class WPSyncSettingsMenu
+namespace Vivasoft\WpSync;
+
+class SettingsMenu
 {
     private $wp_sync_options;
     public function wp_sync_add_plugin_page()
@@ -16,7 +18,7 @@ class WPSyncSettingsMenu
 
     public function wp_sync_create_admin_page()
     {
-        $this->wp_sync_options = get_option(WP_SYNC_OPTIONS_NAME);?>
+        $this->wp_sync_options = get_option(Config::$optionsName);?>
 
 		<div class="wrap">
 			<h2>WP Sync</h2>
@@ -37,7 +39,7 @@ settings_fields('wp_sync_option_group');
     {
         register_setting(
             'wp_sync_option_group', // option_group
-            WP_SYNC_OPTIONS_NAME, // option_name
+            Config::$optionsName, // option_name
             array($this, 'wp_sync_sanitize') // sanitize_callback
         );
 
