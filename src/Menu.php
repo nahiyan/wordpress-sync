@@ -26,7 +26,7 @@ class Menu
                 wp_delete_nav_menu($result);
 
                 $menu = Menu::loadFromFile($path);
-                Logger::debugJson("menu", $menu);
+                // Logger::debugJson("menu", $menu);
             }
         }
 
@@ -35,16 +35,11 @@ class Menu
 
     private static function loadFromFile($filename)
     {
-        $items = [];
         $content = file_get_contents($filename);
         $menu_ = new \SimpleXMLElement($content);
 
-        foreach ($menu_->children() as $child) {
-            $items_ = MenuItem::getItems($child);
-            foreach ($items_ as $item) {
-                $items[] = $item;
-            }
-        }
+        // Logger::debug("Menu", print_r($menu_->children(), true));
+        $items = MenuItem::parse($menu_->children());
 
         $menu = new Menu();
         $menu->items = $items;

@@ -10,46 +10,42 @@ class MenuItem
     public $page_id;
     public $page = "";
 
-    public static function getItems($menu, $path = "")
+    public static function parse($items, $base_path = "")
     {
-        $items = [];
-
         // Create new item
-        $item = new MenuItem();
-        $item->id = 0;
-        $item->page_id = 0;
+        foreach ($items as $item) {
+            Logger::debug(null, "\nItem");
+            $menu_item = new MenuItem();
+            $menu_item->id = 0;
+            $menu_item->page_id = 0;
 
-        // Process the attributes
-        $attributes = (array) $menu->attributes();
-        foreach ($attributes["@attributes"] as $key => $value) {
-            switch ($key) {
-                case "title":
-                    $item->title = $value;
-                    break;
-                case "link":
-                    $item->link = $value;
-                case "page":
-                    $item->page = $path . "/" . $value;
-                    if (str_starts_with($item->page, "/")) {
-                        $item->page = substr($item->page, 1);
-                    }
+            // Process the attributes
+            $path = "";
+            $attributes = $item->attributes();
+            foreach ($attributes as $key => $value) {
+                switch ($key) {
+                    case "page":
+                        $menu_item->page = $value;
+                        $path = join("/", $base_path == "" ? [$menu_item->page] : [$base_path, $menu_item->page]);
 
-                    $page = Page::getFromPath($item->page);
-                    if ($page) {
-                        $item->page_id = $page->id;
-                    }
-                    break;
+                        // See if the page exists for the menu
+                        $page = Page::getFromPath($path);
+                        if ($page) {
+                            $menu_item->page_id = $page->id;
+                        }
+
+                        break;
+                    case "title":
+                        $menu_item->title = $value;
+                        break;
+                }
             }
 
-        }
-        $items[] = $item;
+            Logger::debug("Path", $path);
 
-        $children = $menu->children();
-        foreach ($children as $child) {
-            $items_ = MenuItem::getItems($child, $item->page);
-            foreach ($items_ as $item) {
-                $items[] = $item;
-            }
+            // Process the children
+            $children = $item->children();
+            MenuItem::parse($children, $path);
         }
 
         return $items;
