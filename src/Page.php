@@ -42,7 +42,7 @@ class Page
             // * Prepare the page
             $page = new Page();
             $page->name = $name;
-            $page->title = $item;
+            $page->title = $name;
             $page->content = "Blank page";
             $page->parentPath = Page::wpPathFromDir($dir, $base_dir);
             $page->parentId = $parent_id;
@@ -52,6 +52,12 @@ class Page
             $page_ = Page::getFromPath(path_join($page->parentPath, $page->name));
             if ($page_ != null) {
                 $page->id = $page_->id;
+            }
+
+            $to_be_skipped = is_file(path_join($path, "skip"));
+            if ($to_be_skipped) {
+                Logger::debug(null, "Skip");
+                Logger::debug("Page ID", $page->id);
             }
 
             // Logger::debug($name);
@@ -69,7 +75,6 @@ class Page
                         break;
                     }
                 }
-
             } else if (in_array($ext, Config::$formats)) {
                 $page->loadFromFile($path, $ext);
             } else {
@@ -77,13 +82,17 @@ class Page
             }
 
             // * Upsert the page
-            $page->id = $page->upsertWPPost();
+            if (!$to_be_skipped) {
+                $page->id = $page->upsertWPPost();
+            }
 
             // Logger::debugJson("Page", $page);
 
             // * Handle the children
             if ($is_dir) {
-                $children = Page::upsertFromDir($path, $page->id, $pageDefinitionFilePath, $base_dir);
+                Logger::debug(null, "Children");
+                Logger::debug("pageDefinitionFilePath", $pageDefinitionFilePath);
+                $children = Page::upsertFromDir($path, $page->id, strlen($pageDefinitionFilePath) > 0 ? $pageDefinitionFilePath : "skip", $base_dir);
                 foreach ($children as $child) {
                     array_push($pages, $child);
                 }
