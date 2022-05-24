@@ -32,9 +32,15 @@ class GitHub
             return false;
         }
 
+        $decompressed_repo_path = Config::getBaseDir() . "tmp" . DIRECTORY_SEPARATOR . $repo_name . "-" . $repo_branch;
+
         // * Upsert pages from the content
-        $pages = Page::upsertFromDir(Config::getBaseDir() . "tmp" . DIRECTORY_SEPARATOR . $repo_name . "-" . $repo_branch . DIRECTORY_SEPARATOR . "pages");
+        $pages = Page::upsertFromDir(path_join($decompressed_repo_path, "pages"));
         Logger::debugJson("Pages", $pages);
+
+        // * Upsert menus from the content
+        $menus = Page::upsertFromDir(path_join($decompressed_repo_path, "menus"));
+        Logger::debugJson("Menus", $menus);
 
         return true;
     }
