@@ -22,24 +22,28 @@ class Menu
 
             $ext = pathinfo($path, PATHINFO_EXTENSION);
             if ($ext == "xml") {
-                $result = wp_get_nav_menu_object("javascript-bootcamp");
+                $menu_name = substr($item, 0, strlen($item) - strlen("." . $ext));
+                $result = wp_get_nav_menu_object($menu_name);
                 wp_delete_nav_menu($result);
+                Logger::debug("Menu name", $menu_name);
+                $created_menu = wp_create_nav_menu($menu_name);
+                $menu_id = is_int($created_menu) ? $created_menu : (is_int($result) ? $result : 0);
 
-                $menu = Menu::loadFromFile($path);
-                // Logger::debugJson("menu", $menu);
+                $menu = Menu::createFromFile($path, $menu_id);
+                Logger::debugJson("menu", $menu);
             }
         }
 
         return $menus;
     }
 
-    private static function loadFromFile($filename)
+    private static function createFromFile($filename, $menu_id)
     {
         $content = file_get_contents($filename);
         $menu_ = new \SimpleXMLElement($content);
 
         // Logger::debug("Menu", print_r($menu_->children(), true));
-        $items = MenuItem::parse($menu_->children());
+        $items = MenuItem::create($menu_->children(), "", $menu_id);
 
         $menu = new Menu();
         $menu->items = $items;
