@@ -43,6 +43,9 @@ class WpSync
             return false;
         }
 
+        // Page::upsertFromDir(path_join(Config::getBaseDir(), "tmp/wp-sync-sample-project-develop/pages"));
+        // Menu::createFromDir(path_join(Config::getBaseDir(), "tmp/wp-sync-sample-project-develop/menus"));
+
         // $inputJSON = file_get_contents('php://input');
         // Logger::debug("Input", $inputJSON);
     }
