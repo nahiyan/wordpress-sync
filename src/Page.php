@@ -89,16 +89,19 @@ class Page
             // Logger::debugJson("Page", $page);
 
             // * Handle the children
-            if ($is_dir) {
+            if ($is_dir && $page->id > 0) {
                 Logger::debug(null, "Children");
                 Logger::debug("pageDefinitionFilePath", $pageDefinitionFilePath);
-                $children = Page::upsertFromDir($path, $page->id, strlen($pageDefinitionFilePath) > 0 ? $pageDefinitionFilePath : "skip", $base_dir);
+
+                $children = Page::upsertFromDir($path, $page->id, $pageDefinitionFilePath, $base_dir);
                 foreach ($children as $child) {
                     array_push($pages, $child);
                 }
             }
 
-            array_push($pages, $page);
+            if (!$to_be_skipped) {
+                array_push($pages, $page);
+            }
         }
         return $pages;
     }
