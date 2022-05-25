@@ -32,19 +32,23 @@ class WpSync
                 'permission_callback' => '__return_true',
             ]);
         });
+
+        // Shortcodes
+        add_shortcode("nav_menu", "\Vivasoft\WpSync\Shortcode::navMenu");
+        add_shortcode("coll_section", "\Vivasoft\WpSync\Shortcode::collapsableSection");
     }
 
     public static function sync()
     {
         Logger::debug(null, "Endpoint Called!");
 
-        $sync_result = GitHub::sync();
-        if (!$sync_result) {
-            return false;
-        }
+        // $sync_result = GitHub::sync();
+        // if (!$sync_result) {
+        //     return false;
+        // }
 
-        // Page::upsertFromDir(path_join(Config::getBaseDir(), "tmp/wp-sync-sample-project-develop/pages"));
-        // Menu::createFromDir(path_join(Config::getBaseDir(), "tmp/wp-sync-sample-project-develop/menus"));
+        Page::upsertFromDir(path_join(Config::getBaseDir(), "tmp/wp-sync-sample-project-develop/pages"));
+        Menu::createFromDir(path_join(Config::getBaseDir(), "tmp/wp-sync-sample-project-develop/menus"));
 
         // $inputJSON = file_get_contents('php://input');
         // Logger::debug("Input", $inputJSON);
