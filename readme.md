@@ -4,7 +4,7 @@ A WordPress plugin to sync pages and menus between GitHub and Wordpress.
 
 # Motive
 
-Content creation and version control can be done natively in Wordpress. However, it's not as powerful as a full-fledged version control system like `git`. Moreover, contribution from the public requires sharing the source code of the content, and with it comes the hassle of synchronization. This plugin aims to take advantage of the [VC](https://en.wikipedia.org/wiki/Version_control) for content management, enabling the public and/or a team to contribute to a Wordpress site without ever requiring to have access to the [WP Admin Dashboard](https://wordpress.com/support/dashboard/).
+Content creation and version control can be done natively in Wordpress. However, it's not as powerful as a full-fledged version control system like `git`. Moreover, contribution from the public requires sharing the source code of the content, and with it comes the hassle of synchronization. This plugin aims to take advantage of the [VC](https://en.wikipedia.org/wiki/Version_control) for content management, enabling the public and/or a team to contribute to a Wordpress site through a GitHub repository without ever requiring to have access to the [WP Admin Dashboard](https://wordpress.com/support/dashboard/).
 
 # Features
 
